@@ -21,7 +21,7 @@
             --item-black: #1c1c1e;    
             --item-gold: #e3d1b0;     
             --item-white: #ffffff;
-            --item-lightgray: #e5e5ea; /* 薄いグレー */
+            --item-lightgray: #e5e5ea; 
         }
 
         body {
@@ -32,7 +32,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* セクション区切り線 */
         .section-divider {
             height: 4px;
             background-color: #d1d1d6;
@@ -88,8 +87,9 @@
             overflow: hidden;
         }
         .in-label { font-size: 0.65rem; margin-right: 3px; }
-        .num-circle { width: 24px; height: 24px; background: rgba(255,255,255,0.25); border-radius: 5px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
+        .num-circle { width: 24px; height: 24px; background: rgba(255,255,255,0.25); border-radius: 5px; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
         
+        /* プルダウン */
         .btn-in-box select { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 2; }
 
         .btn-reset { width: 32px; background-color: var(--btn-reset); font-size: 1.1rem; }
@@ -125,7 +125,7 @@ const itemsData = {
         { id: 's2', name: '40/42 Starlight', stock: 0, cls: 'row-gold' },
         { id: 's3', name: '44/46 Black', stock: 0, cls: 'row-black' },
         { id: 's4', name: '44/46 Starlight', stock: 0, cls: 'row-gold' },
-        { id: 's5', name: '充電ケーブル', stock: 0, cls: 'row-lightgray' } // ここを薄いグレーに変更
+        { id: 's5', name: '充電ケーブル', stock: 0, cls: 'row-lightgray' }
     ],
     accGenuine: [
         { id: 'g1', name: '40/42 Band', stock: 0, cls: 'row-white' },
@@ -134,15 +134,16 @@ const itemsData = {
     ]
 };
 
-// データの更新を反映させるためV23にアップデート
-let data = JSON.parse(localStorage.getItem('inventoryV23')) || itemsData;
+// バージョンV24に更新
+let data = JSON.parse(localStorage.getItem('inventoryV24')) || itemsData;
 
-const optionsHTML = Array.from({length: 50}, (_, i) => i + 1)
+// 初期値を「0: -」にしたプルダウンメニュー
+const optionsHTML = '<option value="0">-</option>' + Array.from({length: 50}, (_, i) => i + 1)
     .map(num => `<option value="${num}">${num}</option>`)
     .join('');
 
 function save() {
-    localStorage.setItem('inventoryV23', JSON.stringify(data));
+    localStorage.setItem('inventoryV24', JSON.stringify(data));
     render();
 }
 
@@ -161,13 +162,18 @@ function resetStock(section, id) {
 function handleInSelect(section, id) {
     const select = document.getElementById(`sel-${id}`);
     const amount = parseInt(select.value);
+    
+    // ハイフン(0)が選ばれた場合は何もしない
+    if (amount === 0) return;
+
     const item = data[section].find(i => i.id === id);
     item.stock += amount;
     
+    // 選んだ数字を一瞬表示し、すぐハイフンに戻す
     document.getElementById(`val-${id}`).innerText = amount;
     setTimeout(() => {
-        select.value = "1";
-        document.getElementById(`val-${id}`).innerText = "1";
+        select.value = "0";
+        document.getElementById(`val-${id}`).innerText = "-";
     }, 800);
     save();
 }
@@ -184,7 +190,7 @@ function renderItem(item, section) {
                 <button class="btn-base btn-out" onclick="updateStock('${section}', '${item.id}', -1)">出庫</button>
                 <div class="btn-base btn-in-box">
                     <span class="in-label">入庫</span>
-                    <div class="num-circle" id="val-${item.id}">1</div>
+                    <div class="num-circle" id="val-${item.id}">-</div>
                     <select id="sel-${item.id}" onchange="handleInSelect('${section}', '${item.id}')">
                         ${optionsHTML}
                     </select>
