@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在庫管理マネージャー</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --bg: #f8fafc;
+        }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; color: #1e293b; }
+        h2 { border-left: 5px solid var(--primary); padding-left: 10px; margin-top: 30px; }
+        
+        .item-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .item-info { display: flex; justify-content: space-between; align-items: center; }
+        .item-name { font-weight: bold; font-size: 1.1rem; }
+        .stock-count { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        
+        .controls { display: flex; gap: 10px; align-items: center; }
+        button { cursor: pointer; border: none; border-radius: 6px; padding: 10px; font-weight: bold; }
+        .btn-minus { background: var(--danger); color: white; flex: 1; font-size: 1.2rem; }
+        .input-add { width: 60px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; }
+        .btn-add { background: var(--success); color: white; padding: 8px 15px; }
+        
+        .save-status { text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📦 在庫管理</h1>
+
+    <div id="app">
+        <h2>専用資材</h2>
+        <div id="shipping-materials"></div>
+
+        <h2>付属品 (通常)</h2>
+        <div id="accessories-standard"></div>
+
+        <h2>付属品 (純正)</h2>
+        <div id="accessories-genuine"></div>
+    </div>
+
+    <p class="save-status">※データはブラウザに自動保存されます</p>
+</div>
+
+<script>
+// 在庫データの初期化
+const initialData = {
+    materials: [
+        { id: 'm1', name: 'ゆうパケットmini', stock: 0 },
+        { id: 'm2', name: 'ゆうパケット', stock: 0 },
+        { id: 'm3', name: '宅急便コンパクト', stock: 0 }
+    ],
+    accStandard: [
+        { id: 's1', name: '40/42mm Black', stock: 0 },
+        { id: 's2', name: '40/42mm Starlight', stock: 0 },
+        { id: 's3', name: '44/46mm Black', stock: 0 },
+        { id: 's4', name: '44/46mm Starlight', stock: 0 },
+        { id: 's5', name: '充電ケーブル', stock: 0 }
+    ],
+    accGenuine: [
+        { id: 'g1', name: '40/42mm 純正', stock: 0 },
+        { id: 'g2', name: '44/46mm 純正', stock: 0 },
+        { id: 'g3', name: '充電ケーブル 純正', stock: 0 }
+    ]
+};
+
+let data = JSON.parse(localStorage.getItem('inventoryData')) || initialData;
+
+function save() {
+    localStorage.setItem('inventoryData', JSON.stringify(data));
+    render();
+}
+
+function updateStock(section, id, amount) {
+    const item = data[section].find(i => i.id === id);
+    item.stock = Math.max(0, item.stock + amount);
+    save();
+}
+
+function addStock(section, id) {
+    const input = document.getElementById(`input-${id}`);
+    const amount = parseInt(input.value) || 0;
+    if (amount > 0) {
+        updateStock(section, id, amount);
+        input.value = '';
+    }
+}
+
+function createItemHTML(item, section) {
+    return `
+        <div class="item-card">
+            <div class="item-info">
+                <span class="item-name">${item.name}</span>
+                <span class="stock-count" id="count-${item.id}">${item.stock}</span>
+            </div>
+            <div class="controls">
+                <button class="btn-minus" onclick="updateStock('${section}', '${item.id}', -1)">−1 出庫</button>
+                <input type="number" class="input-add" id="input-${item.id}" placeholder="数">
+                <button class="btn-add" onclick="addStock('${section}', '${item.id}')">入庫</button>
+            </div>
+        </div>
+    `;
+}
+
+function render() {
+    document.getElementById('shipping-materials').innerHTML = data.materials.map(i => createItemHTML(i, 'materials')).join('');
+    document.getElementById('accessories-standard').innerHTML = data.accStandard.map(i => createItemHTML(i, 'accStandard')).join('');
+    document.getElementById('accessories-genuine').innerHTML = data.accGenuine.map(i => createItemHTML(i, 'accGenuine')).join('');
+}
+
+render();
+</script>
+
+</body>
+</html>
