@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>在庫管理Pro V16</title>
+    <title>在庫管理Pro V18</title>
     <style>
         :root {
             --bg-body: #f2f2f7;
             --btn-out: #ff9500; /* オレンジ */
             --btn-in: #34c759;  /* 緑 */
-            --btn-reset: #8e8e93; /* グレー */
+            --btn-reset: #ff3b30; /* 赤（リセット） */
             --item-red: #d32f2f;      
             --item-yellow: #fbc02d;   
             --item-black: #1c1c1e;    
@@ -35,7 +35,7 @@
             gap: 6px;
         }
 
-        /* 名称と残数バッジを囲むメインアイコン */
+        /* 名称と残数バッジを囲むメインバッジ */
         .info-badge {
             display: flex; align-items: center;
             padding: 6px 10px;
@@ -46,7 +46,7 @@
             min-width: 0;
         }
 
-        /* 残数バッジ */
+        /* 残数バッジ（白背景固定） */
         .stock-badge {
             width: 38px; height: 38px; min-width: 38px;
             border-radius: 50%;
@@ -56,12 +56,13 @@
             font-size: 1.1rem; font-weight: 900;
             box-shadow: inset 0 0 2px rgba(0,0,0,0.2);
         }
+        /* 在庫10以下で赤文字 */
         .stock-badge.low-stock { color: #ff3b30 !important; }
 
         .name-area { flex: 1; min-width: 0; }
         .name { font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 操作系 */
+        /* 操作ボタン群 */
         .controls { display: flex; align-items: center; gap: 4px; }
 
         .btn-base {
@@ -72,8 +73,10 @@
             cursor: pointer;
         }
 
+        /* 出庫：オレンジ */
         .btn-out { width: 42px; background-color: var(--btn-out); font-size: 0.7rem; }
 
+        /* 入庫一体型：緑 */
         .btn-in-box {
             position: relative; width: 75px; background-color: var(--btn-in);
             overflow: hidden;
@@ -81,13 +84,13 @@
         .in-label { font-size: 0.65rem; margin-right: 3px; }
         .num-circle { width: 24px; height: 24px; background: rgba(255,255,255,0.25); border-radius: 5px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
         
-        /* 隠しプルダウン（昇順 1-50） */
+        /* プルダウン（昇順 1-50） */
         .btn-in-box select { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 2; }
 
-        /* リセットボタン */
-        .btn-reset { width: 32px; background-color: var(--btn-reset); font-size: 0.6rem; }
+        /* リセット：赤背景・白文字 */
+        .btn-reset { width: 32px; background-color: var(--btn-reset); font-size: 1.1rem; }
 
-        /* バッジの背景色設定 */
+        /* 行の背景色設定 */
         .row-red { background-color: var(--item-red); color: #fff; }
         .row-yellow { background-color: var(--item-yellow); color: #212121; }
         .row-black { background-color: var(--item-black); color: #fff; }
@@ -129,15 +132,16 @@ const itemsData = {
     ]
 };
 
-let data = JSON.parse(localStorage.getItem('inventoryV16')) || itemsData;
+// バージョンV18で保存
+let data = JSON.parse(localStorage.getItem('inventoryV18')) || itemsData;
 
-// ドラムロールの数字を昇順（1から50）に変更
+// 1から50までの選択肢
 const optionsHTML = Array.from({length: 50}, (_, i) => i + 1)
     .map(num => `<option value="${num}">${num}</option>`)
     .join('');
 
 function save() {
-    localStorage.setItem('inventoryV16', JSON.stringify(data));
+    localStorage.setItem('inventoryV18', JSON.stringify(data));
     render();
 }
 
@@ -147,12 +151,10 @@ function updateStock(section, id, amount) {
     save();
 }
 
-function resetStock(section, id, name) {
-    if (confirm(name + ' の在庫を0にリセットしますか？')) {
-        const item = data[section].find(i => i.id === id);
-        item.stock = 0;
-        save();
-    }
+function resetStock(section, id) {
+    const item = data[section].find(i => i.id === id);
+    item.stock = 0;
+    save();
 }
 
 function handleInSelect(section, id) {
@@ -186,7 +188,7 @@ function renderItem(item, section) {
                         ${optionsHTML}
                     </select>
                 </div>
-                <button class="btn-base btn-reset" onclick="resetStock('${section}', '${item.id}', '${item.name}')">0</button>
+                <button class="btn-base btn-reset" onclick="resetStock('${section}', '${item.id}')">×</button>
             </div>
         </div>
     `;
