@@ -4,93 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>在庫管理Pro</title>
     <style>
         :root {
-            --bg-main: #f0f2f5;
-            --color-red: #ff4d4d;
-            --color-yellow: #ffd700;
-            --color-black: #2c2c2e;
-            --color-starlight: #faf9f6;
-            --color-white: #ffffff;
+            --bg-body: #f4f4f7;
+            --btn-out: #ff9500; /* オレンジ */
+            --btn-in: #34c759;  /* 緑 */
+            /* 項目背景色 */
+            --item-red: #ffcccc;      /* ゆうパケット系 */
+            --item-yellow: #fff9c4;   /* 宅急便コンパクト */
+            --item-black: #3a3a3c;    /* Black */
+            --item-starlight: #f5f5f0;/* Starlight */
+            --item-white: #ffffff;    /* ケーブル */
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-main);
-            margin: 0;
-            padding: 20px 10px 100px 10px;
+            font-family: -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0; padding: 10px;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        h1 { font-size: 1.2rem; text-align: center; color: #1c1c1e; margin-bottom: 20px; }
-        h2 { font-size: 1rem; color: #8e8e93; margin: 15px 0 8px 10px; text-transform: uppercase; }
+        h2 { font-size: 0.9rem; color: #666; margin: 15px 0 5px 5px; }
 
         .item-row {
             display: flex;
             align-items: center;
-            background: white;
-            margin-bottom: 8px;
-            border-radius: 12px;
-            padding: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            gap: 8px;
+            padding: 6px 10px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* 名称と残数 */
-        .info {
+        /* 左側：名前と残数 */
+        .name-area {
             flex: 1;
             display: flex;
-            flex-direction: column;
-            padding-left: 8px;
-            overflow: hidden;
+            align-items: baseline;
+            gap: 8px;
+            min-width: 0;
         }
-        .name { font-size: 0.85rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .stock-label { font-size: 1.2rem; font-weight: 800; color: #007aff; }
+        .name { font-size: 0.85rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .stock-num { font-size: 1.1rem; font-weight: 900; color: #007aff; }
 
-        /* ボタンと入力欄 */
-        .controls { display: flex; align-items: center; gap: 5px; }
-
-        .btn-sq {
-            width: 50px;
-            height: 50px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.9rem;
+        /* 右側：操作系 */
+        .controls {
             display: flex;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            gap: 4px;
+        }
+
+        .btn-sq {
+            width: 44px; height: 44px;
+            border: none; border-radius: 6px;
+            color: white; font-weight: bold; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer;
         }
-        .btn-sq:active { transform: scale(0.95); opacity: 0.8; }
+        .btn-out { background-color: var(--btn-out); }
+        .btn-in { background-color: var(--btn-in); }
+        .btn-sq:active { opacity: 0.7; transform: scale(0.95); }
 
-        .input-qty {
-            width: 40px;
-            height: 46px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 1rem;
-            background: #fff;
+        select {
+            height: 44px; width: 55px;
+            border: 1px solid #ccc; border-radius: 6px;
+            font-size: 1rem; text-align: center;
+            background: white;
+            -webkit-appearance: none; /* iPhone標準デザインの調整 */
+            padding-left: 10px;
         }
 
-        /* カラーバリエーション */
-        .bg-red { background-color: var(--color-red); color: white; }
-        .bg-yellow { background-color: var(--color-yellow); color: #333; }
-        .bg-black { background-color: var(--color-black); color: white; }
-        .bg-starlight { background-color: var(--color-starlight); color: #333; border: 1px solid #e5e5e5; }
-        .bg-white { background-color: var(--color-white); color: #333; border: 1px solid #e5e5e5; }
+        /* 項目別背景カラー（文字色も調整） */
+        .row-red { background-color: var(--item-red); color: #800; }
+        .row-yellow { background-color: var(--item-yellow); color: #850; }
+        .row-black { background-color: var(--item-black); color: #fff; }
+        .row-black .stock-num { color: #5ac8fa; } /* 黒背景で見えやすく */
+        .row-starlight { background-color: var(--item-starlight); color: #444; }
+        .row-white { background-color: var(--item-white); color: #444; }
 
-        .status-msg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; pointer-events: none; opacity: 0; transition: 0.3s; }
     </style>
 </head>
 <body>
-
-<h1>📦 在庫マネージャー</h1>
 
 <div id="app">
     <h2>専用資材</h2>
@@ -103,69 +98,59 @@
     <div id="list-acc-genuine"></div>
 </div>
 
-<div id="toast" class="status-msg">保存されました</div>
-
 <script>
 const itemsData = {
     materials: [
-        { id: 'm1', name: 'ゆうパケットmini', stock: 0, color: 'bg-red' },
-        { id: 'm2', name: 'ゆうパケット', stock: 0, color: 'bg-red' },
-        { id: 'm3', name: '宅急便コンパクト', stock: 0, color: 'bg-yellow' }
+        { id: 'm1', name: 'ゆうパケットmini', stock: 0, cls: 'row-red' },
+        { id: 'm2', name: 'ゆうパケット', stock: 0, cls: 'row-red' },
+        { id: 'm3', name: '宅急便コンパクト', stock: 0, cls: 'row-yellow' }
     ],
     accStandard: [
-        { id: 's1', name: '40/42 Black', stock: 0, color: 'bg-black' },
-        { id: 's2', name: '40/42 Starlight', stock: 0, color: 'bg-starlight' },
-        { id: 's3', name: '44/46 Black', stock: 0, color: 'bg-black' },
-        { id: 's4', name: '44/46 Starlight', stock: 0, color: 'bg-starlight' },
-        { id: 's5', name: '充電ケーブル', stock: 0, color: 'bg-white' }
+        { id: 's1', name: '40/42 Black', stock: 0, cls: 'row-black' },
+        { id: 's2', name: '40/42 Starlight', stock: 0, cls: 'row-starlight' },
+        { id: 's3', name: '44/46 Black', stock: 0, cls: 'row-black' },
+        { id: 's4', name: '44/46 Starlight', stock: 0, cls: 'row-starlight' },
+        { id: 's5', name: '充電ケーブル', stock: 0, cls: 'row-white' }
     ],
     accGenuine: [
-        { id: 'g1', name: '40/42 純正', stock: 0, color: 'bg-black' },
-        { id: 'g2', name: '44/46 純正', stock: 0, color: 'bg-black' },
-        { id: 'g3', name: '純正ケーブル', stock: 0, color: 'bg-white' }
+        { id: 'g1', name: '40/42 純正', stock: 0, cls: 'row-black' },
+        { id: 'g2', name: '44/46 純正', stock: 0, cls: 'row-black' },
+        { id: 'g3', name: '純正ケーブル', stock: 0, cls: 'row-white' }
     ]
 };
 
-let data = JSON.parse(localStorage.getItem('inventoryDataV2')) || itemsData;
+let data = JSON.parse(localStorage.getItem('inventoryV3')) || itemsData;
 
-function showToast() {
-    const t = document.getElementById('toast');
-    t.style.opacity = '1';
-    setTimeout(() => t.style.opacity = '0', 1000);
-}
+// 1〜50のプルダウン用オプション作成
+const optionsHTML = Array.from({length: 50}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
 
 function save() {
-    localStorage.setItem('inventoryDataV2', JSON.stringify(data));
+    localStorage.setItem('inventoryV3', JSON.stringify(data));
     render();
-    showToast();
 }
 
-function changeStock(section, id, amount) {
+function updateStock(section, id, amount) {
     const item = data[section].find(i => i.id === id);
     item.stock = Math.max(0, item.stock + amount);
     save();
 }
 
-function addFromInput(section, id) {
-    const input = document.getElementById(`in-${id}`);
-    const val = parseInt(input.value) || 0;
-    if (val !== 0) {
-        changeStock(section, id, val);
-        input.value = '';
-    }
+function addSpecific(section, id) {
+    const val = parseInt(document.getElementById(`sel-${id}`).value);
+    updateStock(section, id, val);
 }
 
 function renderItem(item, section) {
     return `
-        <div class="item-row">
-            <div class="info">
-                <div class="name">${item.name}</div>
-                <div class="stock-label" id="cnt-${item.id}">${item.stock}</div>
+        <div class="item-row ${item.cls}">
+            <div class="name-area">
+                <span class="name">${item.name}</span>
+                <span class="stock-num">${item.stock}</span>
             </div>
             <div class="controls">
-                <button class="btn-sq bg-black" onclick="changeStock('${section}', '${item.id}', -1)">出庫</button>
-                <input type="number" class="input-qty" id="in-${item.id}" placeholder="0">
-                <button class="btn-sq ${item.color}" onclick="addFromInput('${section}', '${item.id}')">入庫</button>
+                <button class="btn-sq btn-out" onclick="updateStock('${section}', '${item.id}', -1)">出庫</button>
+                <select id="sel-${item.id}">${optionsHTML}</select>
+                <button class="btn-sq btn-in" onclick="addSpecific('${section}', '${item.id}')">入庫</button>
             </div>
         </div>
     `;
