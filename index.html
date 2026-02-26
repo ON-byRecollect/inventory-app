@@ -20,7 +20,8 @@
             --item-yellow: #fbc02d;   
             --item-black: #1c1c1e;    
             --item-gold: #e3d1b0;     
-            --item-white: #ffffff;    
+            --item-white: #ffffff;
+            --item-lightgray: #e5e5ea; /* 薄いグレー */
         }
 
         body {
@@ -98,6 +99,7 @@
         .row-black { background-color: var(--item-black); color: #fff; }
         .row-gold { background-color: var(--item-gold); color: #4a3f28; }
         .row-white { background-color: var(--item-white); color: #333; border: 1px solid #ddd; }
+        .row-lightgray { background-color: var(--item-lightgray); color: #333; border: 1px solid #ccc; }
 
         .btn-base:active { opacity: 0.6; transform: scale(0.95); }
     </style>
@@ -123,7 +125,7 @@ const itemsData = {
         { id: 's2', name: '40/42 Starlight', stock: 0, cls: 'row-gold' },
         { id: 's3', name: '44/46 Black', stock: 0, cls: 'row-black' },
         { id: 's4', name: '44/46 Starlight', stock: 0, cls: 'row-gold' },
-        { id: 's5', name: '充電ケーブル', stock: 0, cls: 'row-white' }
+        { id: 's5', name: '充電ケーブル', stock: 0, cls: 'row-lightgray' } // ここを薄いグレーに変更
     ],
     accGenuine: [
         { id: 'g1', name: '40/42 Band', stock: 0, cls: 'row-white' },
@@ -132,15 +134,15 @@ const itemsData = {
     ]
 };
 
-// バージョン更新
-let data = JSON.parse(localStorage.getItem('inventoryV22')) || itemsData;
+// データの更新を反映させるためV23にアップデート
+let data = JSON.parse(localStorage.getItem('inventoryV23')) || itemsData;
 
 const optionsHTML = Array.from({length: 50}, (_, i) => i + 1)
     .map(num => `<option value="${num}">${num}</option>`)
     .join('');
 
 function save() {
-    localStorage.setItem('inventoryV22', JSON.stringify(data));
+    localStorage.setItem('inventoryV23', JSON.stringify(data));
     render();
 }
 
@@ -194,10 +196,8 @@ function renderItem(item, section) {
 }
 
 function render() {
-    // 専用資材の表示
     document.getElementById('list-materials').innerHTML = data.materials.map(i => renderItem(i, 'materials')).join('');
     
-    // 全ての付属品（通常＋純正）をまとめて表示
     const accHTML = [
         ...data.accStandard.map(i => renderItem(i, 'accStandard')),
         ...data.accGenuine.map(i => renderItem(i, 'accGenuine'))
