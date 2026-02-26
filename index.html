@@ -65,6 +65,7 @@
             font-size: 1.1rem; font-weight: 900;
             box-shadow: inset 0 0 2px rgba(0,0,0,0.2);
         }
+        /* アラート用：赤文字 */
         .stock-badge.low-stock { color: #ff3b30 !important; }
 
         .name-area { flex: 1; min-width: 0; }
@@ -89,7 +90,6 @@
         .in-label { font-size: 0.65rem; margin-right: 3px; }
         .num-circle { width: 24px; height: 24px; background: rgba(255,255,255,0.25); border-radius: 5px; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
         
-        /* プルダウン */
         .btn-in-box select { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 2; }
 
         .btn-reset { width: 32px; background-color: var(--btn-reset); font-size: 1.1rem; }
@@ -134,16 +134,15 @@ const itemsData = {
     ]
 };
 
-// バージョンV24に更新
-let data = JSON.parse(localStorage.getItem('inventoryV24')) || itemsData;
+// バージョンV25
+let data = JSON.parse(localStorage.getItem('inventoryV25')) || itemsData;
 
-// 初期値を「0: -」にしたプルダウンメニュー
 const optionsHTML = '<option value="0">-</option>' + Array.from({length: 50}, (_, i) => i + 1)
     .map(num => `<option value="${num}">${num}</option>`)
     .join('');
 
 function save() {
-    localStorage.setItem('inventoryV24', JSON.stringify(data));
+    localStorage.setItem('inventoryV25', JSON.stringify(data));
     render();
 }
 
@@ -162,14 +161,11 @@ function resetStock(section, id) {
 function handleInSelect(section, id) {
     const select = document.getElementById(`sel-${id}`);
     const amount = parseInt(select.value);
-    
-    // ハイフン(0)が選ばれた場合は何もしない
     if (amount === 0) return;
 
     const item = data[section].find(i => i.id === id);
     item.stock += amount;
     
-    // 選んだ数字を一瞬表示し、すぐハイフンに戻す
     document.getElementById(`val-${id}`).innerText = amount;
     setTimeout(() => {
         select.value = "0";
@@ -179,7 +175,10 @@ function handleInSelect(section, id) {
 }
 
 function renderItem(item, section) {
-    const lowStockClass = item.stock <= 10 ? 'low-stock' : '';
+    // 純正セクション（accGenuine）以外、かつ在庫10以下のときだけlow-stockクラスを付与
+    const isAlertRequired = (section !== 'accGenuine');
+    const lowStockClass = (isAlertRequired && item.stock <= 10) ? 'low-stock' : '';
+
     return `
         <div class="item-row">
             <div class="info-badge ${item.cls}">
