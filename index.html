@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>在庫管理Pro V15</title>
+    <title>在庫管理Pro V16</title>
     <style>
         :root {
             --bg-body: #f2f2f7;
             --btn-out: #ff9500; /* オレンジ */
             --btn-in: #34c759;  /* 緑 */
+            --btn-reset: #8e8e93; /* グレー */
             --item-red: #d32f2f;      
             --item-yellow: #fbc02d;   
             --item-black: #1c1c1e;    
@@ -29,23 +30,23 @@
 
         .item-row {
             display: flex; align-items: center;
-            justify-content: space-between; /* 左右に広げる */
+            justify-content: space-between;
             margin-bottom: 8px;
-            gap: 10px;
+            gap: 6px;
         }
 
-        /* 名称と残数だけを囲むメインアイコン（バッジ） */
+        /* 名称と残数バッジを囲むメインアイコン */
         .info-badge {
             display: flex; align-items: center;
             padding: 6px 10px;
-            border-radius: 20px; /* 角を丸く */
+            border-radius: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             gap: 8px;
-            flex: 1; /* 残りスペースを占める */
+            flex: 1;
             min-width: 0;
         }
 
-        /* 左側：残数バッジ（白背景固定・黒文字） */
+        /* 残数バッジ */
         .stock-badge {
             width: 38px; height: 38px; min-width: 38px;
             border-radius: 50%;
@@ -55,66 +56,36 @@
             font-size: 1.1rem; font-weight: 900;
             box-shadow: inset 0 0 2px rgba(0,0,0,0.2);
         }
-        /* 10以下の時の赤文字アラート */
-        .stock-badge.low-stock {
-            color: #ff3b30 !important;
-        }
+        .stock-badge.low-stock { color: #ff3b30 !important; }
 
-        .name-area {
-            flex: 1; min-width: 0;
-        }
-        
-        .name {
-            font-size: 0.85rem; font-weight: 700;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
+        .name-area { flex: 1; min-width: 0; }
+        .name { font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 右側：ボタン操作系（背景色の外） */
-        .controls {
-            display: flex; align-items: center; gap: 8px;
-        }
+        /* 操作系 */
+        .controls { display: flex; align-items: center; gap: 4px; }
 
-        /* 出庫ボタン */
-        .btn-out {
-            width: 50px; height: 40px; /* 少しコンパクトに */
-            background-color: var(--btn-out);
-            border: none; border-radius: 10px;
-            color: white; font-weight: 800; font-size: 0.75rem;
+        .btn-base {
+            height: 40px; border: none; border-radius: 10px;
+            color: white; font-weight: 800;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             cursor: pointer;
         }
 
-        /* 入庫＋数字一体型ボタン */
+        .btn-out { width: 42px; background-color: var(--btn-out); font-size: 0.7rem; }
+
         .btn-in-box {
-            position: relative;
-            width: 80px; height: 40px; /* 少しコンパクトに */
-            background-color: var(--btn-in);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative; width: 75px; background-color: var(--btn-in);
             overflow: hidden;
-            cursor: pointer;
         }
+        .in-label { font-size: 0.65rem; margin-right: 3px; }
+        .num-circle { width: 24px; height: 24px; background: rgba(255,255,255,0.25); border-radius: 5px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
+        
+        /* 隠しプルダウン（昇順 1-50） */
+        .btn-in-box select { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 2; }
 
-        .in-label { font-size: 0.7rem; font-weight: 800; margin-right: 4px; }
-
-        .num-circle {
-            width: 26px; height: 26px;
-            background: rgba(255,255,255,0.25);
-            border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.95rem; font-weight: 800;
-        }
-
-        /* 隠しプルダウン */
-        .btn-in-box select {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0;
-            z-index: 2;
-        }
+        /* リセットボタン */
+        .btn-reset { width: 32px; background-color: var(--btn-reset); font-size: 0.6rem; }
 
         /* バッジの背景色設定 */
         .row-red { background-color: var(--item-red); color: #fff; }
@@ -122,13 +93,8 @@
         .row-black { background-color: var(--item-black); color: #fff; }
         .row-gold { background-color: var(--item-gold); color: #4a3f28; }
         .row-white { background-color: var(--item-white); color: #333; border: 1px solid #ddd; }
-        
-        /* 白・黄・金背景時のバッジ調整 (境界線を付ける) */
-        .row-white .stock-badge, .row-yellow .stock-badge, .row-gold .stock-badge { 
-            border: 1px solid rgba(0,0,0,0.1);
-        }
 
-        .btn-out:active, .btn-in-box:active { opacity: 0.6; transform: scale(0.95); }
+        .btn-base:active { opacity: 0.6; transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -136,10 +102,8 @@
 <div id="app">
     <h2>専用資材</h2>
     <div id="list-materials"></div>
-
     <h2>付属品</h2>
     <div id="list-acc-standard"></div>
-
     <h2>付属品 (純正)</h2>
     <div id="list-acc-genuine"></div>
 </div>
@@ -165,38 +129,43 @@ const itemsData = {
     ]
 };
 
-let data = JSON.parse(localStorage.getItem('inventoryV15')) || itemsData;
+let data = JSON.parse(localStorage.getItem('inventoryV16')) || itemsData;
 
-// ドラムロールの数字を逆順（50から1）に生成
-const optionsHTML = Array.from({length: 50}, (_, i) => 50 - i)
-    .map(num => `<option value="${num}" ${num === 1 ? 'selected' : ''}>${num}</option>`)
+// ドラムロールの数字を昇順（1から50）に変更
+const optionsHTML = Array.from({length: 50}, (_, i) => i + 1)
+    .map(num => `<option value="${num}">${num}</option>`)
     .join('');
 
 function save() {
-    localStorage.setItem('inventoryV15', JSON.stringify(data));
+    localStorage.setItem('inventoryV16', JSON.stringify(data));
     render();
 }
 
-function outStock(section, id) {
+function updateStock(section, id, amount) {
     const item = data[section].find(i => i.id === id);
-    item.stock = Math.max(0, item.stock - 1);
+    item.stock = Math.max(0, item.stock + amount);
     save();
+}
+
+function resetStock(section, id, name) {
+    if (confirm(name + ' の在庫を0にリセットしますか？')) {
+        const item = data[section].find(i => i.id === id);
+        item.stock = 0;
+        save();
+    }
 }
 
 function handleInSelect(section, id) {
     const select = document.getElementById(`sel-${id}`);
     const amount = parseInt(select.value);
     const item = data[section].find(i => i.id === id);
-    
     item.stock += amount;
     
-    // 選択値を一時表示し、内部的に1へ戻す
     document.getElementById(`val-${id}`).innerText = amount;
     setTimeout(() => {
         select.value = "1";
         document.getElementById(`val-${id}`).innerText = "1";
     }, 800);
-    
     save();
 }
 
@@ -206,19 +175,18 @@ function renderItem(item, section) {
         <div class="item-row">
             <div class="info-badge ${item.cls}">
                 <div class="stock-badge ${lowStockClass}">${item.stock}</div>
-                <div class="name-area">
-                    <span class="name">${item.name}</span>
-                </div>
+                <div class="name-area"><span class="name">${item.name}</span></div>
             </div>
             <div class="controls">
-                <button class="btn-out" onclick="outStock('${section}', '${item.id}')">出庫</button>
-                <div class="btn-in-box">
+                <button class="btn-base btn-out" onclick="updateStock('${section}', '${item.id}', -1)">出庫</button>
+                <div class="btn-base btn-in-box">
                     <span class="in-label">入庫</span>
                     <div class="num-circle" id="val-${item.id}">1</div>
                     <select id="sel-${item.id}" onchange="handleInSelect('${section}', '${item.id}')">
                         ${optionsHTML}
                     </select>
                 </div>
+                <button class="btn-base btn-reset" onclick="resetStock('${section}', '${item.id}', '${item.name}')">0</button>
             </div>
         </div>
     `;
@@ -229,9 +197,7 @@ function render() {
     document.getElementById('list-acc-standard').innerHTML = data.accStandard.map(i => renderItem(i, 'accStandard')).join('');
     document.getElementById('list-acc-genuine').innerHTML = data.accGenuine.map(i => renderItem(i, 'accGenuine')).join('');
 }
-
 render();
 </script>
-
 </body>
 </html>
