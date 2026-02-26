@@ -13,9 +13,9 @@
     <style>
         :root {
             --bg-body: #f2f2f7;
-            --btn-out: #ff9500; /* オレンジ */
-            --btn-in: #34c759;  /* 緑 */
-            --btn-reset: #ff3b30; /* 赤（リセット） */
+            --btn-out: #ff9500;
+            --btn-in: #34c759;
+            --btn-reset: #ff3b30;
             --item-red: #d32f2f;      
             --item-yellow: #fbc02d;   
             --item-black: #1c1c1e;    
@@ -26,17 +26,16 @@
         body {
             font-family: -apple-system, sans-serif;
             background-color: var(--bg-body);
-            margin: 0; padding: 10px;
+            margin: 0; padding: 20px 10px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
-        h2 { font-size: 0.9rem; color: #6e6e73; margin: 20px 0 8px 8px; font-weight: bold; border-left: 4px solid #007aff; padding-left: 8px; }
-
+        /* セクション区切り線 */
         .section-divider {
             height: 4px;
             background-color: #d1d1d6;
-            margin: 30px 10px 10px 10px;
+            margin: 25px 10px;
             border-radius: 2px;
         }
 
@@ -106,13 +105,9 @@
 <body>
 
 <div id="app">
-    <h2>専用資材</h2>
     <div id="list-materials"></div>
     <div class="section-divider"></div>
-    <h2>付属品</h2>
-    <div id="list-acc-standard"></div>
-    <h2>付属品 (純正)</h2>
-    <div id="list-acc-genuine"></div>
+    <div id="list-all-accessories"></div>
 </div>
 
 <script>
@@ -137,14 +132,15 @@ const itemsData = {
     ]
 };
 
-let data = JSON.parse(localStorage.getItem('inventoryV21')) || itemsData;
+// バージョン更新
+let data = JSON.parse(localStorage.getItem('inventoryV22')) || itemsData;
 
 const optionsHTML = Array.from({length: 50}, (_, i) => i + 1)
     .map(num => `<option value="${num}">${num}</option>`)
     .join('');
 
 function save() {
-    localStorage.setItem('inventoryV21', JSON.stringify(data));
+    localStorage.setItem('inventoryV22', JSON.stringify(data));
     render();
 }
 
@@ -198,9 +194,15 @@ function renderItem(item, section) {
 }
 
 function render() {
+    // 専用資材の表示
     document.getElementById('list-materials').innerHTML = data.materials.map(i => renderItem(i, 'materials')).join('');
-    document.getElementById('list-acc-standard').innerHTML = data.accStandard.map(i => renderItem(i, 'accStandard')).join('');
-    document.getElementById('list-acc-genuine').innerHTML = data.accGenuine.map(i => renderItem(i, 'accGenuine')).join('');
+    
+    // 全ての付属品（通常＋純正）をまとめて表示
+    const accHTML = [
+        ...data.accStandard.map(i => renderItem(i, 'accStandard')),
+        ...data.accGenuine.map(i => renderItem(i, 'accGenuine'))
+    ].join('');
+    document.getElementById('list-all-accessories').innerHTML = accHTML;
 }
 render();
 </script>
