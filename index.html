@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>在庫管理Pro V4</title>
+    <title>在庫管理Pro V7</title>
     <style>
         :root {
             --bg-body: #f0f0f3;
             --btn-out: #ff9500; /* オレンジ */
             --btn-in: #34c759;  /* 緑 */
             
-            /* 項目背景色（ご要望の濃いめ・ゴールド設定） */
-            --item-red: #d32f2f;      /* ゆうパケット：濃い赤 */
-            --item-yellow: #fbc02d;   /* 宅急便：濃い黄 */
-            --item-black: #1c1c1e;    /* Black */
-            --item-gold: #e3d1b0;     /* Starlight：ゴールド系 */
-            --item-white: #ffffff;    /* ケーブル：白 */
+            /* 背景カラー */
+            --item-red: #d32f2f;      
+            --item-yellow: #fbc02d;   
+            --item-black: #1c1c1e;    
+            --item-gold: #e3d1b0;     
+            --item-white: #ffffff;    
         }
 
         body {
@@ -26,7 +26,7 @@
             user-select: none;
         }
 
-        h2 { font-size: 0.85rem; color: #6e6e73; margin: 15px 0 6px 8px; font-weight: 600; }
+        h2 { font-size: 0.9rem; color: #333; margin: 20px 0 8px 8px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
 
         .item-row {
             display: flex;
@@ -38,7 +38,7 @@
             gap: 10px;
         }
 
-        /* 左側：残数アイコンと名称 */
+        /* 左側：残数バッジと名称 */
         .info-area {
             flex: 1;
             display: flex;
@@ -52,8 +52,8 @@
             height: 32px;
             min-width: 32px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -69,7 +69,7 @@
             white-space: nowrap;
         }
 
-        /* 右側：操作系 */
+        /* 右側：ボタン・プルダウン */
         .controls {
             display: flex;
             align-items: center;
@@ -77,51 +77,47 @@
         }
 
         .btn-sq {
-            width: 42px; height: 42px;
+            width: 44px; height: 44px;
             border: none; border-radius: 8px;
             color: white; font-weight: 900; font-size: 0.75rem;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .btn-out { background-color: var(--btn-out); }
         .btn-in { background-color: var(--btn-in); }
         .btn-sq:active { opacity: 0.6; transform: scale(0.92); }
 
         select {
-            height: 42px; width: 52px;
+            height: 44px; width: 52px;
             border: 1px solid rgba(0,0,0,0.1); border-radius: 8px;
             font-size: 0.95rem; font-weight: bold; text-align: center;
             background: white;
-            padding-left: 5px;
             -webkit-appearance: none;
         }
 
-        /* 項目別カラー設定 */
+        /* 背景別スタイル */
         .row-red { background-color: var(--item-red); color: #ffffff; }
         .row-yellow { background-color: var(--item-yellow); color: #212121; }
-        .row-yellow .stock-badge { background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.1); }
-        
         .row-black { background-color: var(--item-black); color: #ffffff; }
-        
         .row-gold { background-color: var(--item-gold); color: #4a3f28; }
-        .row-gold .stock-badge { background: rgba(255,255,255,0.4); border-color: rgba(0,0,0,0.1); }
-        
         .row-white { background-color: var(--item-white); color: #333333; border: 1px solid #ddd; }
-        .row-white .stock-badge { background: #f0f0f0; border-color: #ccc; }
+        
+        .row-white .stock-badge, .row-yellow .stock-badge, .row-gold .stock-badge { 
+            background: rgba(0,0,0,0.05); 
+        }
 
     </style>
 </head>
 <body>
 
 <div id="app">
-    <h2>📦 専用資材</h2>
+    <h2>専用資材</h2>
     <div id="list-materials"></div>
 
-    <h2>💍 付属品</h2>
+    <h2>付属品</h2>
     <div id="list-acc-standard"></div>
 
-    <h2>🛡️ 付属品 (純正)</h2>
+    <h2>付属品 (純正)</h2>
     <div id="list-acc-genuine"></div>
 </div>
 
@@ -140,19 +136,19 @@ const itemsData = {
         { id: 's5', name: '充電ケーブル', stock: 0, cls: 'row-white' }
     ],
     accGenuine: [
-        { id: 'g1', name: '40/42 純正', stock: 0, cls: 'row-black' },
-        { id: 'g2', name: '44/46 純正', stock: 0, cls: 'row-black' },
-        { id: 'g3', name: '純正ケーブル', stock: 0, cls: 'row-white' }
+        { id: 'g1', name: '40/42 Band', stock: 0, cls: 'row-white' },
+        { id: 'g2', name: '44/46 Band', stock: 0, cls: 'row-white' },
+        { id: 'g3', name: '充電ケーブル', stock: 0, cls: 'row-white' }
     ]
 };
 
-let data = JSON.parse(localStorage.getItem('inventoryV4')) || itemsData;
+// バージョンをV7に更新
+let data = JSON.parse(localStorage.getItem('inventoryV7')) || itemsData;
 
-// 1〜50のプルダウン用
 const optionsHTML = Array.from({length: 50}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
 
 function save() {
-    localStorage.setItem('inventoryV4', JSON.stringify(data));
+    localStorage.setItem('inventoryV7', JSON.stringify(data));
     render();
 }
 
@@ -171,7 +167,7 @@ function renderItem(item, section) {
     return `
         <div class="item-row ${item.cls}">
             <div class="info-area">
-                <div class="stock-badge" id="cnt-${item.id}">${item.stock}</div>
+                <div class="stock-badge">${item.stock}</div>
                 <span class="name">${item.name}</span>
             </div>
             <div class="controls">
