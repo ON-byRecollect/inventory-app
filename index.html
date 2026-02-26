@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>在庫管理Pro V8</title>
+    <title>在庫管理Pro V9</title>
     <style>
         :root {
             --bg-body: #f2f2f7;
-            --btn-out: #ff9500; /* 出庫：オレンジ */
-            --btn-in: #34c759;  /* 入庫：緑 */
-            
-            /* 背景カラー */
+            --btn-out: #ff9500; /* オレンジ */
+            --btn-in: #34c759;  /* 緑 */
             --item-red: #d32f2f;      
             --item-yellow: #fbc02d;   
             --item-black: #1c1c1e;    
@@ -27,7 +25,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        h2 { font-size: 0.85rem; color: #6e6e73; margin: 18px 0 6px 8px; font-weight: 600; text-transform: uppercase; }
+        h2 { font-size: 0.85rem; color: #6e6e73; margin: 18px 0 6px 8px; font-weight: 600; }
 
         .item-row {
             display: flex;
@@ -37,7 +35,7 @@
             border-radius: 12px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.08);
             gap: 8px;
-            height: 54px;
+            height: 52px;
         }
 
         /* 左側：残数と名称 */
@@ -50,86 +48,75 @@
         }
         
         .stock-badge {
-            width: 36px;
-            height: 36px;
-            min-width: 36px;
+            width: 36px; height: 36px; min-width: 36px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.3);
             border: 1px solid rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            font-weight: 800;
-            text-align: center;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; font-weight: 800;
         }
 
         .name {
-            font-size: 0.85rem;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 0.85rem; font-weight: 700;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* 右側：操作系（出庫・数選択・入庫） */
+        /* 右側：ボタン操作系 */
         .controls {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            display: flex; align-items: center; gap: 6px;
         }
 
-        .btn-action {
-            width: 50px; height: 46px;
-            border: none; border-radius: 8px;
-            color: white; font-weight: 800; font-size: 0.75rem;
+        /* 出庫ボタン */
+        .btn-out {
+            width: 55px; height: 44px;
+            background-color: var(--btn-out);
+            border: none; border-radius: 10px;
+            color: white; font-weight: 800; font-size: 0.8rem;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .btn-out { background-color: var(--btn-out); }
-        .btn-in { background-color: var(--btn-in); }
-        .btn-action:active { opacity: 0.6; transform: scale(0.95); }
 
-        /* 回転式プルダウンを包むエリア */
-        .select-wrapper {
+        /* 入庫＋数字一体型ボタン */
+        .btn-in-box {
             position: relative;
-            width: 50px; height: 46px;
-            background: white;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 85px; height: 44px;
+            background-color: var(--btn-in);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
-        .select-wrapper select {
+        .in-label { font-size: 0.75rem; font-weight: 800; margin-right: 4px; }
+
+        .num-circle {
+            width: 28px; height: 28px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; font-weight: 800;
+        }
+
+        /* 隠しプルダウン（ドラムリール起動用） */
+        .btn-in-box select {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            opacity: 0; /* 見えないけどタップ可能 */
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
             z-index: 2;
         }
 
-        .selected-val {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #333;
-            z-index: 1;
-        }
-
-        /* 背景別スタイル */
+        /* 各種背景色設定 */
         .row-red { background-color: var(--item-red); color: #fff; }
         .row-yellow { background-color: var(--item-yellow); color: #212121; }
         .row-black { background-color: var(--item-black); color: #fff; }
         .row-gold { background-color: var(--item-gold); color: #4a3f28; }
         .row-white { background-color: var(--item-white); color: #333; border: 1px solid #ddd; }
         
-        /* バッジの微調整 */
-        .row-white .stock-badge, .row-yellow .stock-badge, .row-gold .stock-badge { 
-            background: rgba(0,0,0,0.05); 
-        }
+        /* 白・黄背景時のバッジ調整 */
+        .row-white .stock-badge, .row-yellow .stock-badge, .row-gold .stock-badge { background: rgba(0,0,0,0.05); }
 
+        .btn-out:active, .btn-in-box:active { opacity: 0.6; transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -166,32 +153,38 @@ const itemsData = {
     ]
 };
 
-let data = JSON.parse(localStorage.getItem('inventoryV8')) || itemsData;
+let data = JSON.parse(localStorage.getItem('inventoryV9')) || itemsData;
 
-// 1〜50のプルダウン（iPhone標準の回転式になる）
+// 1〜50のプルダウン（ドラムリール）用オプション
 const optionsHTML = Array.from({length: 50}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
 
 function save() {
-    localStorage.setItem('inventoryV8', JSON.stringify(data));
+    localStorage.setItem('inventoryV9', JSON.stringify(data));
     render();
 }
 
-function updateStock(section, id, amount) {
+function outStock(section, id) {
     const item = data[section].find(i => i.id === id);
-    item.stock = Math.max(0, item.stock + amount);
+    item.stock = Math.max(0, item.stock - 1);
     save();
 }
 
-// プルダウンの値が変更された時に表示を更新する
-function syncVal(id) {
-    const sel = document.getElementById(`sel-${id}`);
-    const display = document.getElementById(`val-${id}`);
-    display.innerText = sel.value;
-}
-
-function addSpecific(section, id) {
-    const val = parseInt(document.getElementById(`sel-${id}`).value);
-    updateStock(section, id, val);
+// ドラムリールで数字を選んだら即座に加算する
+function handleInSelect(section, id) {
+    const select = document.getElementById(`sel-${id}`);
+    const amount = parseInt(select.value);
+    const item = data[section].find(i => i.id === id);
+    
+    item.stock += amount;
+    
+    // 選択値を表示用に一瞬更新し、その後1に戻す
+    document.getElementById(`val-${id}`).innerText = amount;
+    setTimeout(() => {
+        select.value = "1";
+        document.getElementById(`val-${id}`).innerText = "1";
+    }, 800);
+    
+    save();
 }
 
 function renderItem(item, section) {
@@ -202,12 +195,14 @@ function renderItem(item, section) {
                 <span class="name">${item.name}</span>
             </div>
             <div class="controls">
-                <button class="btn-action btn-out" onclick="updateStock('${section}', '${item.id}', -1)">出庫</button>
-                <div class="select-wrapper">
-                    <span class="selected-val" id="val-${item.id}">1</span>
-                    <select id="sel-${item.id}" onchange="syncVal('${item.id}')">${optionsHTML}</select>
+                <button class="btn-out" onclick="outStock('${section}', '${item.id}')">出庫</button>
+                <div class="btn-in-box">
+                    <span class="in-label">入庫</span>
+                    <div class="num-circle" id="val-${item.id}">1</div>
+                    <select id="sel-${item.id}" onchange="handleInSelect('${section}', '${item.id}')">
+                        ${optionsHTML}
+                    </select>
                 </div>
-                <button class="btn-action btn-in" onclick="addSpecific('${section}', '${item.id}')">入庫</button>
             </div>
         </div>
     `;
