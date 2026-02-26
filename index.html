@@ -2,126 +2,179 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>在庫管理マネージャー</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>在庫管理Pro</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --danger: #ef4444;
-            --success: #22c55e;
-            --bg: #f8fafc;
+            --bg-main: #f0f2f5;
+            --color-red: #ff4d4d;
+            --color-yellow: #ffd700;
+            --color-black: #2c2c2e;
+            --color-starlight: #faf9f6;
+            --color-white: #ffffff;
         }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        h1 { text-align: center; color: #1e293b; }
-        h2 { border-left: 5px solid var(--primary); padding-left: 10px; margin-top: 30px; }
-        
-        .item-card {
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            margin: 0;
+            padding: 20px 10px 100px 10px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1 { font-size: 1.2rem; text-align: center; color: #1c1c1e; margin-bottom: 20px; }
+        h2 { font-size: 1rem; color: #8e8e93; margin: 15px 0 8px 10px; text-transform: uppercase; }
+
+        .item-row {
+            display: flex;
+            align-items: center;
             background: white;
-            padding: 15px;
+            margin-bottom: 8px;
             border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 10px;
+            padding: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            gap: 8px;
+        }
+
+        /* 名称と残数 */
+        .info {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            padding-left: 8px;
+            overflow: hidden;
         }
-        .item-info { display: flex; justify-content: space-between; align-items: center; }
-        .item-name { font-weight: bold; font-size: 1.1rem; }
-        .stock-count { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-        
-        .controls { display: flex; gap: 10px; align-items: center; }
-        button { cursor: pointer; border: none; border-radius: 6px; padding: 10px; font-weight: bold; }
-        .btn-minus { background: var(--danger); color: white; flex: 1; font-size: 1.2rem; }
-        .input-add { width: 60px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; }
-        .btn-add { background: var(--success); color: white; padding: 8px 15px; }
-        
-        .save-status { text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 20px; }
+        .name { font-size: 0.85rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stock-label { font-size: 1.2rem; font-weight: 800; color: #007aff; }
+
+        /* ボタンと入力欄 */
+        .controls { display: flex; align-items: center; gap: 5px; }
+
+        .btn-sq {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .btn-sq:active { transform: scale(0.95); opacity: 0.8; }
+
+        .input-qty {
+            width: 40px;
+            height: 46px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1rem;
+            background: #fff;
+        }
+
+        /* カラーバリエーション */
+        .bg-red { background-color: var(--color-red); color: white; }
+        .bg-yellow { background-color: var(--color-yellow); color: #333; }
+        .bg-black { background-color: var(--color-black); color: white; }
+        .bg-starlight { background-color: var(--color-starlight); color: #333; border: 1px solid #e5e5e5; }
+        .bg-white { background-color: var(--color-white); color: #333; border: 1px solid #e5e5e5; }
+
+        .status-msg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; pointer-events: none; opacity: 0; transition: 0.3s; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>📦 在庫管理</h1>
+<h1>📦 在庫マネージャー</h1>
 
-    <div id="app">
-        <h2>専用資材</h2>
-        <div id="shipping-materials"></div>
+<div id="app">
+    <h2>専用資材</h2>
+    <div id="list-materials"></div>
 
-        <h2>付属品 (通常)</h2>
-        <div id="accessories-standard"></div>
+    <h2>付属品</h2>
+    <div id="list-acc-standard"></div>
 
-        <h2>付属品 (純正)</h2>
-        <div id="accessories-genuine"></div>
-    </div>
-
-    <p class="save-status">※データはブラウザに自動保存されます</p>
+    <h2>付属品 (純正)</h2>
+    <div id="list-acc-genuine"></div>
 </div>
 
+<div id="toast" class="status-msg">保存されました</div>
+
 <script>
-// 在庫データの初期化
-const initialData = {
+const itemsData = {
     materials: [
-        { id: 'm1', name: 'ゆうパケットmini', stock: 0 },
-        { id: 'm2', name: 'ゆうパケット', stock: 0 },
-        { id: 'm3', name: '宅急便コンパクト', stock: 0 }
+        { id: 'm1', name: 'ゆうパケットmini', stock: 0, color: 'bg-red' },
+        { id: 'm2', name: 'ゆうパケット', stock: 0, color: 'bg-red' },
+        { id: 'm3', name: '宅急便コンパクト', stock: 0, color: 'bg-yellow' }
     ],
     accStandard: [
-        { id: 's1', name: '40/42mm Black', stock: 0 },
-        { id: 's2', name: '40/42mm Starlight', stock: 0 },
-        { id: 's3', name: '44/46mm Black', stock: 0 },
-        { id: 's4', name: '44/46mm Starlight', stock: 0 },
-        { id: 's5', name: '充電ケーブル', stock: 0 }
+        { id: 's1', name: '40/42 Black', stock: 0, color: 'bg-black' },
+        { id: 's2', name: '40/42 Starlight', stock: 0, color: 'bg-starlight' },
+        { id: 's3', name: '44/46 Black', stock: 0, color: 'bg-black' },
+        { id: 's4', name: '44/46 Starlight', stock: 0, color: 'bg-starlight' },
+        { id: 's5', name: '充電ケーブル', stock: 0, color: 'bg-white' }
     ],
     accGenuine: [
-        { id: 'g1', name: '40/42mm 純正', stock: 0 },
-        { id: 'g2', name: '44/46mm 純正', stock: 0 },
-        { id: 'g3', name: '充電ケーブル 純正', stock: 0 }
+        { id: 'g1', name: '40/42 純正', stock: 0, color: 'bg-black' },
+        { id: 'g2', name: '44/46 純正', stock: 0, color: 'bg-black' },
+        { id: 'g3', name: '純正ケーブル', stock: 0, color: 'bg-white' }
     ]
 };
 
-let data = JSON.parse(localStorage.getItem('inventoryData')) || initialData;
+let data = JSON.parse(localStorage.getItem('inventoryDataV2')) || itemsData;
 
-function save() {
-    localStorage.setItem('inventoryData', JSON.stringify(data));
-    render();
+function showToast() {
+    const t = document.getElementById('toast');
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 1000);
 }
 
-function updateStock(section, id, amount) {
+function save() {
+    localStorage.setItem('inventoryDataV2', JSON.stringify(data));
+    render();
+    showToast();
+}
+
+function changeStock(section, id, amount) {
     const item = data[section].find(i => i.id === id);
     item.stock = Math.max(0, item.stock + amount);
     save();
 }
 
-function addStock(section, id) {
-    const input = document.getElementById(`input-${id}`);
-    const amount = parseInt(input.value) || 0;
-    if (amount > 0) {
-        updateStock(section, id, amount);
+function addFromInput(section, id) {
+    const input = document.getElementById(`in-${id}`);
+    const val = parseInt(input.value) || 0;
+    if (val !== 0) {
+        changeStock(section, id, val);
         input.value = '';
     }
 }
 
-function createItemHTML(item, section) {
+function renderItem(item, section) {
     return `
-        <div class="item-card">
-            <div class="item-info">
-                <span class="item-name">${item.name}</span>
-                <span class="stock-count" id="count-${item.id}">${item.stock}</span>
+        <div class="item-row">
+            <div class="info">
+                <div class="name">${item.name}</div>
+                <div class="stock-label" id="cnt-${item.id}">${item.stock}</div>
             </div>
             <div class="controls">
-                <button class="btn-minus" onclick="updateStock('${section}', '${item.id}', -1)">−1 出庫</button>
-                <input type="number" class="input-add" id="input-${item.id}" placeholder="数">
-                <button class="btn-add" onclick="addStock('${section}', '${item.id}')">入庫</button>
+                <button class="btn-sq bg-black" onclick="changeStock('${section}', '${item.id}', -1)">出庫</button>
+                <input type="number" class="input-qty" id="in-${item.id}" placeholder="0">
+                <button class="btn-sq ${item.color}" onclick="addFromInput('${section}', '${item.id}')">入庫</button>
             </div>
         </div>
     `;
 }
 
 function render() {
-    document.getElementById('shipping-materials').innerHTML = data.materials.map(i => createItemHTML(i, 'materials')).join('');
-    document.getElementById('accessories-standard').innerHTML = data.accStandard.map(i => createItemHTML(i, 'accStandard')).join('');
-    document.getElementById('accessories-genuine').innerHTML = data.accGenuine.map(i => createItemHTML(i, 'accGenuine')).join('');
+    document.getElementById('list-materials').innerHTML = data.materials.map(i => renderItem(i, 'materials')).join('');
+    document.getElementById('list-acc-standard').innerHTML = data.accStandard.map(i => renderItem(i, 'accStandard')).join('');
+    document.getElementById('list-acc-genuine').innerHTML = data.accGenuine.map(i => renderItem(i, 'accGenuine')).join('');
 }
 
 render();
