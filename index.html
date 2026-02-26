@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>在庫管理Pro V18</title>
+    <title>在庫管理Pro V20</title>
     <style>
         :root {
             --bg-body: #f2f2f7;
@@ -27,6 +27,14 @@
         }
 
         h2 { font-size: 0.9rem; color: #6e6e73; margin: 20px 0 8px 8px; font-weight: bold; border-left: 4px solid #007aff; padding-left: 8px; }
+
+        /* セクション区切り線 */
+        .section-divider {
+            height: 4px;
+            background-color: #d1d1d6;
+            margin: 30px 10px 10px 10px;
+            border-radius: 2px;
+        }
 
         .item-row {
             display: flex; align-items: center;
@@ -105,8 +113,12 @@
 <div id="app">
     <h2>専用資材</h2>
     <div id="list-materials"></div>
+
+    <div class="section-divider"></div>
+
     <h2>付属品</h2>
     <div id="list-acc-standard"></div>
+
     <h2>付属品 (純正)</h2>
     <div id="list-acc-genuine"></div>
 </div>
@@ -116,7 +128,8 @@ const itemsData = {
     materials: [
         { id: 'm1', name: 'ゆうパケットmini', stock: 0, cls: 'row-red' },
         { id: 'm2', name: 'ゆうパケット', stock: 0, cls: 'row-red' },
-        { id: 'm3', name: '宅急便コンパクト', stock: 0, cls: 'row-yellow' }
+        { id: 'm3', name: '宅急便コンパクト（薄型）', stock: 0, cls: 'row-yellow' },
+        { id: 'm4', name: '宅急便コンパクト（BOX）', stock: 0, cls: 'row-yellow' }
     ],
     accStandard: [
         { id: 's1', name: '40/42 Black', stock: 0, cls: 'row-black' },
@@ -132,16 +145,15 @@ const itemsData = {
     ]
 };
 
-// バージョンV18で保存
-let data = JSON.parse(localStorage.getItem('inventoryV18')) || itemsData;
+// バージョンV20
+let data = JSON.parse(localStorage.getItem('inventoryV20')) || itemsData;
 
-// 1から50までの選択肢
 const optionsHTML = Array.from({length: 50}, (_, i) => i + 1)
     .map(num => `<option value="${num}">${num}</option>`)
     .join('');
 
 function save() {
-    localStorage.setItem('inventoryV18', JSON.stringify(data));
+    localStorage.setItem('inventoryV20', JSON.stringify(data));
     render();
 }
 
